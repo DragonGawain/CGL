@@ -31,6 +31,7 @@ public class Cell : TileBase
     int willLive = 0;
 
     public static bool phase = false;
+    public static bool settingBounds = false;
 
     public override bool StartUp(Vector3Int position, ITilemap tilemap, GameObject go)
     {
@@ -95,34 +96,50 @@ public class Cell : TileBase
     public override void GetTileData(Vector3Int position, ITilemap tilemap, ref TileData tileData)
     {
         Debug.Log("get tile data");
+
+        if (settingBounds)
+        {
+            Debug.Log("setting bounds");
+            if (isLive)
+                tileData.sprite = white;
+            else
+                tileData.sprite = black;
+        }
+
+        // 0: Die()
+        // 1: Life()
+        // 2: neither
         if (GameManager.isGameActive && !phase)
         {
+            Debug.Log("phase 1");
+            willLive = 2;
             // 1. Any live cell with fewer than two live neighbours dies, as if by underpopulation.
-            if (nbLiveNeighbors < 2 && isLive)
-                willLive = 0;
-            // 2. Any live cell with two or three live neighbours lives on to the next generation.
-            else if ((nbLiveNeighbors == 2 || nbLiveNeighbors == 3) && isLive)
-                willLive = 2;
             // 3. Any live cell with more than three live neighbours dies, as if by overpopulation.
-            else if (nbLiveNeighbors > 3 && isLive)
+            if ((nbLiveNeighbors < 2 || nbLiveNeighbors > 3) && isLive)
                 willLive = 0;
             // 4. Any dead cell with exactly three live neighbours becomes a live cell, as if by reproduction.
             else if (nbLiveNeighbors == 3 && !isLive)
                 willLive = 1;
+            // else if (nbLiveNeighbors > 3 && isLive)
+            //     willLive = 0;
+            // 2. Any live cell with two or three live neighbours lives on to the next generation.
+            // else if ((nbLiveNeighbors == 2 || nbLiveNeighbors == 3) && isLive)
+            //     willLive = 2;
         }
 
         if (GameManager.isGameActive && phase)
         {
+            Debug.Log("phase 2");
             if (willLive == 0)
                 Die();
             else if (willLive == 1)
                 Life();
-        }
 
-        if (isLive)
-            tileData.sprite = white;
-        else
-            tileData.sprite = black;
+            if (isLive)
+                tileData.sprite = white;
+            else
+                tileData.sprite = black;
+        }
     }
 
     public void IncrementNeighborCount() => nbLiveNeighbors++;

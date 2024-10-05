@@ -81,7 +81,9 @@ public class GameManager : MonoBehaviour
                 new(Mathf.FloorToInt(gameSize / 2f), Mathf.FloorToInt(gameSize / 2f), 0)
             )
         );
+        Cell.settingBounds = true;
         tilemap.RefreshAllTiles();
+        Cell.settingBounds = false;
         isGameActive = false;
     }
 
@@ -104,7 +106,9 @@ public class GameManager : MonoBehaviour
                     cell.Die();
                 else
                     cell.Life();
+                Cell.settingBounds = true;
                 tilemap.RefreshTile(mouseCellCoords);
+                Cell.settingBounds = false;
             }
         }
     }
@@ -142,5 +146,17 @@ public class GameManager : MonoBehaviour
             genText.text = "Generation: " + generation;
             yield return new WaitForSeconds(gameSpeedSlider.value);
         }
+    }
+
+    public void AdvanceByOneGen()
+    {
+        isGameActive = true;
+        Cell.phase = false;
+        tilemap.RefreshAllTiles();
+        Cell.phase = true;
+        tilemap.RefreshAllTiles();
+        generation++;
+        genText.text = "Generation: " + generation;
+        isGameActive = false;
     }
 }
