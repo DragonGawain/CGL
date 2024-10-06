@@ -128,6 +128,7 @@ public class GameManager2 : MonoBehaviour
             }
         }
         allCells.Add(newCell.position, newCell);
+        popText.text = "Population: " + allCells.Count;
     }
 
     IEnumerator Simulate()
