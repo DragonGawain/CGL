@@ -12,21 +12,40 @@ public class Cell2 : MonoBehaviour
     // Start is called before the first frame update
     void Awake()
     {
-        // this.position = new(
-        //     transform.position.x > 0
-        //         ? Mathf.FloorToInt(transform.position.x)
-        //         : Mathf.CeilToInt(transform.position.x),
-        //     transform.position.y > 0
-        //         ? Mathf.FloorToInt(transform.position.y)
-        //         : Mathf.CeilToInt(transform.position.y),
-        //     0
-        // );
-
         this.position = new(
             Mathf.RoundToInt(transform.position.x),
             Mathf.RoundToInt(transform.position.y),
             0
         );
+
+        // Add all neighbors to the frontier
+
+        if (!GameManager2.allCells.ContainsKey(position + new Vector3Int(1, 1, 0)))
+            GameManager2.frontier.Add(position + new Vector3Int(1, 1, 0));
+
+        if (!GameManager2.allCells.ContainsKey(position + new Vector3Int(1, 0, 0)))
+            GameManager2.frontier.Add(position + new Vector3Int(1, 0, 0));
+
+        if (!GameManager2.allCells.ContainsKey(position + new Vector3Int(1, -1, 0)))
+            GameManager2.frontier.Add(position + new Vector3Int(1, -1, 0));
+
+        if (!GameManager2.allCells.ContainsKey(position + new Vector3Int(0, 1, 0)))
+            GameManager2.frontier.Add(position + new Vector3Int(0, 1, 0));
+
+        if (!GameManager2.allCells.ContainsKey(position + new Vector3Int(0, -1, 0)))
+            GameManager2.frontier.Add(position + new Vector3Int(0, -1, 0));
+
+        if (!GameManager2.allCells.ContainsKey(position + new Vector3Int(-1, 1, 0)))
+            GameManager2.frontier.Add(position + new Vector3Int(-1, 1, 0));
+
+        if (!GameManager2.allCells.ContainsKey(position + new Vector3Int(-1, 0, 0)))
+            GameManager2.frontier.Add(position + new Vector3Int(-1, 0, 0));
+
+        if (!GameManager2.allCells.ContainsKey(position + new Vector3Int(-1, -1, 0)))
+            GameManager2.frontier.Add(position + new Vector3Int(-1, -1, 0));
+
+        // Remove self from frontier
+        GameManager2.frontier.RemoveAll(RemoveAllCondition);
     }
 
     // Update is called once per frame
@@ -43,5 +62,10 @@ public class Cell2 : MonoBehaviour
         {
             cell.Value.RemoveNeighbor(position);
         }
+    }
+
+    private bool RemoveAllCondition(Vector3Int pos)
+    {
+        return pos.Equals(position);
     }
 }
