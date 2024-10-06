@@ -15,14 +15,14 @@ public class CameraMove : MonoBehaviour
     {
         Yspeed = Input.GetAxisRaw("Vertical") * camSensitivitySlider.value;
         Xspeed = Input.GetAxisRaw("Horizontal") * camSensitivitySlider.value;
-        Zspeed = Input.mouseScrollDelta.y * camSensitivitySlider.value;
+        Zspeed = Input.mouseScrollDelta.y * camSensitivitySlider.value * 2;
 
         transform.position = new Vector3(
             transform.position.x + Xspeed,
             transform.position.y + Yspeed,
             transform.position.z
         );
-        Camera.main.orthographicSize -= Zspeed;
+        Camera.main.orthographicSize = Mathf.Max(Camera.main.orthographicSize - Zspeed, 0.5f);
     }
 
     public void CenterCam(Vector3 pos)

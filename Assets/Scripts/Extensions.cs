@@ -22,6 +22,21 @@ public static class Extensions
         }
     }
 
+    public static void BuildTrueFrontier(this List<Vector3Int> list)
+    {
+        GameManager2.countedFrontier.Clear();
+        foreach (Vector3Int vec in list)
+        {
+            // if the cell is alive, skip it
+            if (GameManager2.allCells.ContainsKey(vec))
+                continue;
+            if (GameManager2.countedFrontier.ContainsKey(vec))
+                GameManager2.countedFrontier[vec]++;
+            else
+                GameManager2.countedFrontier.Add(vec, 1);
+        }
+    }
+
     // public static bool AddToFrontier(this List<Vector3Int> list, Vector3Int item)
     // {
     //     list.Add(item);

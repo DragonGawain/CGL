@@ -18,6 +18,9 @@ public class GameManager2 : MonoBehaviour
     [SerializeField]
     TextMeshProUGUI popText;
 
+    [SerializeField]
+    Transform cellParent;
+
     static Vector3 mouseWorldPos;
     static Vector3Int mouseCellCoords;
     GameObject white;
@@ -43,32 +46,6 @@ public class GameManager2 : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        // Cell2[] cellArray = FindObjectsOfType<Cell2>();
-        // foreach (Cell2 cell in cellArray)
-        // {
-        //     allCells.Add(cell.position, cell);
-        // }
-        // for (int i = 0; i < allCells.Count; i++)
-        // {
-        //     if (i != 0)
-        //         allCells[i].AddNeighbor(allCells[i - 1].position, allCells[i - 1]);
-        //     if (i != allCells.Count - 1)
-        //         allCells[i].AddNeighbor(allCells[i + 1].position, allCells[i + 1]);
-        // }
-        // foreach (KeyValuePair<Vector3Int, Cell2> cellA in allCells)
-        // {
-        //     foreach (KeyValuePair<Vector3Int, Cell2> cellB in allCells)
-        //     {
-        //         if (cellA.Value == cellB.Value)
-        //             continue;
-        //         if (
-        //             Mathf.Abs(cellA.Value.position.x - cellB.Value.position.x) <= 1
-        //             && Mathf.Abs(cellA.Value.position.y - cellB.Value.position.y) <= 1
-        //         )
-        //             cellA.Value.AddNeighbor(cellB.Value.position, cellB.Value);
-        //     }
-        // }
-
         white = Resources.Load<GameObject>("White");
     }
 
@@ -104,10 +81,7 @@ public class GameManager2 : MonoBehaviour
             //     return;
 
             if (allCells.ContainsKey(mouseCellCoords))
-            {
                 Destroy(allCells[mouseCellCoords].gameObject);
-                allCells.Remove(mouseCellCoords);
-            }
             else
                 CreateNewCell(mouseCellCoords);
         }
@@ -115,38 +89,32 @@ public class GameManager2 : MonoBehaviour
 
     public void NextGen()
     {
-        Debug.Log(frontier[0]);
         foreach (KeyValuePair<Vector3Int, Cell2> cell in allCells)
             cell.Value.NextGeneration();
 
         // frontier.Sort(v3IComparator);
-        frontier.CountDuplicates();
+        frontier.BuildTrueFrontier();
 
         foreach (KeyValuePair<Vector3Int, int> front in countedFrontier)
         {
+            // Debug.Log("pos: " + front.Key + ", count: " + front.Value);
             if (front.Value == 3)
                 CreateNewCell(front.Key);
         }
 
-        // this is inneficient cause I need to loop through it twice
-        // However, since O(2n) = O(n), it doesn't *really* matter
-        // (but in practice, it does matter, and will slow things down noticeably. Eventually)
-        // foreach (Vector3Int loc in toAdd)
-        //     CreateNewCell(loc);
-
         foreach (KeyValuePair<Vector3Int, Cell2> cell in toDie)
-        {
-            allCells.Remove(cell.Key);
             Destroy(cell.Value.gameObject);
-        }
+
         toDie.Clear();
         // toAdd.Clear();
+        generation++;
+        genText.text = "Generation: " + generation;
         popText.text = "Population: " + allCells.Count;
     }
 
     public void CreateNewCell(Vector3Int loc)
     {
-        newCellObject = Instantiate(white, loc, Quaternion.identity);
+        newCellObject = Instantiate(white, loc, Quaternion.identity, cellParent);
         newCell = newCellObject.GetComponent<Cell2>();
         foreach (KeyValuePair<Vector3Int, Cell2> cell in allCells)
         {
@@ -167,9 +135,6 @@ public class GameManager2 : MonoBehaviour
         while (true)
         {
             NextGen();
-            generation++;
-            genText.text = "Generation: " + generation;
-            popText.text = "Population: " + allCells.Count;
             yield return new WaitForSeconds(gameSpeedSlider.value);
         }
     }
@@ -177,10 +142,21 @@ public class GameManager2 : MonoBehaviour
     public void StartSimulation()
     {
         StartCoroutine(Simulate());
+        isGameActive = true;
     }
 
     public void PauseSimulation()
     {
         StopAllCoroutines();
+        isGameActive = false;
+    }
+
+    public void ClearSimulation()
+    {
+        foreach (Transform child in cellParent)
+            Destroy(child.gameObject);
+        genText.text = "Generation: 0";
+        popText.text = "Population: 0";
+        generation = 0;
     }
 }
